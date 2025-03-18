@@ -12,7 +12,6 @@ class RecurrentNetwork:
     def __init__(self,lr,neurons):
         self.lr=lr
         self.neurons=neurons
-        self.train_mode=False
 
 
     #------------------------------------------------------------------------------------------------#
@@ -33,7 +32,7 @@ class RecurrentNetwork:
     
     #------------------------------------------------------------------------------------------------#
 
-    def forward(self,x:np.array):
+    def forward(self,x:np.array,mode="inference"):
         """Returns the output of the forward propagation
             *Input Shape=(batch_size,sequence_size,one_hot_length)"""
         
@@ -62,7 +61,12 @@ class RecurrentNetwork:
 
             #Stores all instances of hidden state 
             self.hidden_state[i]=hidden_state
-        return hidden_state
+
+        #Return the final output if in inference mode
+
+        if mode=="inference":
+           return hidden_state
+       
     
     #------------------------------------------------------------------------------------------------#
 
@@ -76,12 +80,24 @@ class RecurrentNetwork:
         
     #------------------------------------------------------------------------------------------------#
 
-    def backward(self):
+    def backward(self,x,y):
         """Performs a backward propagation updating all the weights and biases of the model at once
         Currently lets assume the loss is MSE"""
+        count=0
+        arrLen=x.shape[0]
         for i in self.hidden_state[::-1]:
+
             
-            out=self.partial_forward()
+            out=self.partial_forward(x[:,count],i)
+            count+=1
+
+            dB=(-2)*(y-out)/arrLen
+
+            
+
+
+
+
     
     #------------------------------------------------------------------------------------------------#
 
@@ -94,7 +110,7 @@ class RecurrentNetwork:
             y:Corresponding Labels/target
             epochs:No of epochs to train the model 
             """
-        self.train_mode=True
+        
         for i in range(epochs):
             self.forward(x)
             self.backward(x,y)
